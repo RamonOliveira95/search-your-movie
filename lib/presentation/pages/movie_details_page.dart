@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/movie.dart';
+import '../../domain/entities/movie.dart';
 
 class MovieDetailsPage extends StatelessWidget {
   final Movie movie;
@@ -10,25 +10,27 @@ class MovieDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(movie.title)),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(movie.poster, height: 250),
-            const SizedBox(height: 20),
-            Text(
-              movie.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Center(
+              child: Image.network(
+                movie.poster,
+                height: 300,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, size: 100),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text('Ano: ${movie.year}'),
-            const SizedBox(height: 8),
-            Text('Tipo: ${movie.type}'),
             const SizedBox(height: 16),
-            const Text(
-              'Sinopse (mock): Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.',
-              textAlign: TextAlign.justify,
-            ),
+            Text('Ano: ${movie.year}', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text('Gênero: ${movie.genre ?? 'N/A'}', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 16),
+            const Text('Sinopse:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(movie.plot ?? 'Sem sinopse disponível', style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),

@@ -1,18 +1,35 @@
 import 'package:flutter/material.dart';
-import '../../../data/mock/mocked_movies.dart';
-import '../pages/movie_details_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/movie.dart';
+import '../blocs/search/search_bloc.dart';
+import '../blocs/search/search_event.dart';
+import '../blocs/search/search_state.dart';
+import 'movie_details_page.dart';
+import '../../data/sources/movie_remote_source.dart';
 
-class SearchPage extends StatelessWidget {
-  const SearchPage({super.key});
+class SearchPage extends StatefulWidget {
+  final MovieRemoteDatasource remoteDatasource;
+
+  const SearchPage({super.key, required this.remoteDatasource});
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  final TextEditingController _controller = TextEditingController();
+
+  void _onSearch() {
+    final query = _controller.text.trim();
+    if (query.isNotEmpty) {
+      context.read<SearchBloc>().add(SearchMoviesEvent(query));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController();
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Busca de Filmes'),
-      ),
+      appBar: AppBar(title: const Text('Busca de Filmes')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -21,24 +38,51 @@ class SearchPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: controller,
+                    controller: _controller,
                     decoration: const InputDecoration(
                       labelText: 'Digite o nome do filme',
                     ),
+                    onSubmitted: (_) => _onSearch(),
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () {
-                    // Adicionar a busca ao app
-                  },
+                  onPressed: _onSearch,
                   child: const Text('Buscar'),
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            const Expanded(
-              child: MovieList(),
+            Expanded(
+              child: BlocBuilder<SearchBloc, SearchState>(
+                builder: (context, state) {
+                  if (state is SearchInitial) {
+                    return const Center(child: Text('Digite algo para buscar'));
+                  } else if (state is SearchLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is SearchSuccess) {
+                    if (state.movies.isEmpty) {
+                      return const Center(
+                        child: Text('Nenhum filme encontrado'),
+                      );
+                    }
+                    return ListView.builder(
+                      itemCount: state.movies.length,
+                      itemBuilder: (context, index) {
+                        final movie = state.movies[index];
+                        return MovieTile(
+                          movie: movie,
+                          remoteDatasource: widget.remoteDatasource,
+                        );
+                      },
+                    );
+                  } else if (state is SearchError) {
+                    return Center(child: Text('Erro: ${state.message}'));
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
             ),
           ],
         ),
@@ -47,32 +91,44 @@ class SearchPage extends StatelessWidget {
   }
 }
 
-class MovieList extends StatelessWidget {
-  const MovieList({super.key});
+class MovieTile extends StatelessWidget {
+  final Movie movie;
+  final MovieRemoteDatasource remoteDatasource;
+
+  const MovieTile({
+    super.key,
+    required this.movie,
+    required this.remoteDatasource,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: mockedMovies.length,
-      itemBuilder: (context, index) {
-        final movie = mockedMovies[index];
-        return ListTile(
-          leading: Image.network(
-            movie.poster,
-            width: 50,
-            fit: BoxFit.cover,
-          ),
-          title: Text(movie.title),
-          subtitle: Text(movie.year),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MovieDetailsPage(movie: movie),
-              ),
-            );
-          },
-        );
+    return ListTile(
+      leading: Image.network(
+        movie.poster,
+        width: 50,
+        height: 75,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+      ),
+      title: Text(movie.title),
+      subtitle: Text(movie.year),
+      onTap: () async {
+        try {
+          final detailedMovie = await remoteDatasource.getMovieDetails(
+            movie.imdbID,
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MovieDetailsPage(movie: detailedMovie),
+            ),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro ao carregar detalhes: $e')),
+          );
+        }
       },
     );
   }
