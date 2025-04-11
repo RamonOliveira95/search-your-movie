@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/repositories/movie_repository_impl.dart';
 import '../../domain/entities/movie.dart';
+import '../widgets/state_widgets.dart';
 import 'movie_details_page.dart';
 
 class RecentPage extends StatefulWidget {
@@ -69,11 +70,11 @@ class _RecentPageState extends State<RecentPage> {
         future: _futureMovies,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingStateWidget();
           } else if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}'));
+            return ErrorStateWidget(snapshot.error.toString());
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Nenhum filme recente'));
+            return const EmptyStateWidget('Nenhum filme recente');
           }
 
           final movies = snapshot.data!;
@@ -87,25 +88,29 @@ class _RecentPageState extends State<RecentPage> {
                   width: 50,
                   height: 75,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.image_not_supported),
+                  errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
                 ),
                 title: Text(movie.title),
                 subtitle: Text(movie.year),
-                onTap: () async {
-                  final detailedMovie = await widget.repository
-                      .getMovieDetails(movie.imdbID);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MovieDetailsPage(movie: detailedMovie),
-                    ),
-                  );
-                },
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(Icons.delete),
                   onPressed: () => _confirmDelete(movie),
                 ),
+                onTap: () async {
+                  try {
+                    final detailedMovie = await widget.repository.getMovieDetails(movie.imdbID);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MovieDetailsPage(movie: detailedMovie),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erro ao carregar detalhes: $e')),
+                    );
+                  }
+                },
               );
             },
           );

@@ -6,6 +6,7 @@ import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
 import 'movie_details_page.dart';
 import '../../data/repositories/movie_repository_impl.dart';
+import '../widgets/state_widgets.dart';
 
 class SearchPage extends StatefulWidget {
   final MovieRepositoryImpl repository;
@@ -78,10 +79,14 @@ class _SearchPageState extends State<SearchPage> {
               child: BlocBuilder<SearchBloc, SearchState>(
                 builder: (context, state) {
                   if (state is SearchInitial) {
-                    return const Center(child: Text('Digite algo para buscar'));
+                    return const EmptyStateWidget('Digite algo para buscar');
                   } else if (state is SearchLoading && state.page == 1) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const LoadingStateWidget();
                   } else if (state is SearchSuccess) {
+                    if (state.movies.isEmpty) {
+                      return const EmptyStateWidget('Nenhum filme encontrado');
+                    }
+
                     return ListView.builder(
                       controller: _scrollController,
                       itemCount: state.hasMore ? state.movies.length + 1 : state.movies.length,
@@ -92,13 +97,13 @@ class _SearchPageState extends State<SearchPage> {
                         } else {
                           return const Padding(
                             padding: EdgeInsets.all(16),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: LoadingStateWidget(),
                           );
                         }
                       },
                     );
                   } else if (state is SearchError) {
-                    return Center(child: Text('Erro: ${state.message}'));
+                    return ErrorStateWidget(state.message);
                   } else {
                     return const SizedBox.shrink();
                   }
