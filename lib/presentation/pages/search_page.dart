@@ -5,12 +5,15 @@ import '../blocs/search/search_bloc.dart';
 import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
 import 'movie_details_page.dart';
-import '../../data/sources/movie_remote_source.dart';
+import '../../data/repositories/movie_repository_impl.dart';
 
 class SearchPage extends StatefulWidget {
-  final MovieRemoteDatasource remoteDatasource;
+  final MovieRepositoryImpl repository;
 
-  const SearchPage({super.key, required this.remoteDatasource});
+  const SearchPage({
+    super.key,
+    required this.repository,
+  });
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -72,7 +75,7 @@ class _SearchPageState extends State<SearchPage> {
                         final movie = state.movies[index];
                         return MovieTile(
                           movie: movie,
-                          remoteDatasource: widget.remoteDatasource,
+                          repository: widget.repository,
                         );
                       },
                     );
@@ -93,12 +96,12 @@ class _SearchPageState extends State<SearchPage> {
 
 class MovieTile extends StatelessWidget {
   final Movie movie;
-  final MovieRemoteDatasource remoteDatasource;
+  final MovieRepositoryImpl repository;
 
   const MovieTile({
     super.key,
     required this.movie,
-    required this.remoteDatasource,
+    required this.repository,
   });
 
   @override
@@ -115,9 +118,9 @@ class MovieTile extends StatelessWidget {
       subtitle: Text(movie.year),
       onTap: () async {
         try {
-          final detailedMovie = await remoteDatasource.getMovieDetails(
-            movie.imdbID,
-          );
+          final detailedMovie = await repository.getMovieDetails(movie.imdbID);
+          await repository.saveRecentMovie(detailedMovie);
+
           Navigator.push(
             context,
             MaterialPageRoute(
