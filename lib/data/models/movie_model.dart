@@ -2,20 +2,13 @@ import '../../domain/entities/movie.dart';
 
 class MovieModel extends Movie {
   MovieModel({
-    required String title,
-    required String year,
-    required String imdbID,
-    required String poster,
-    required String genre,
-    required String plot,
-  }) : super(
-          title: title,
-          year: year,
-          imdbID: imdbID,
-          poster: poster,
-          genre: genre,
-          plot: plot,
-        );
+    required super.title,
+    required super.year,
+    required super.imdbID,
+    required super.poster,
+    required String super.genre,
+    required String super.plot,
+  });
 
   factory MovieModel.fromJson(Map<String, dynamic> json) {
   return MovieModel(

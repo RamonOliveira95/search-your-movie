@@ -35,6 +35,7 @@ class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
     }
   }
 
+  @override
   Future<Movie> getMovieDetails(String imdbID) async {
     final response = await dio.get(
       'http://www.omdbapi.com/',
