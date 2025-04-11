@@ -3,10 +3,10 @@ import '../../domain/entities/movie.dart';
 import '../models/movie_model.dart';
 
 abstract class MovieRemoteDatasource {
-  Future<List<Movie>> searchMovies(String query);
-
-  getMovieDetails(String imdbID) {}
+  Future<List<Movie>> searchMovies(String query, int page);
+  Future<Movie> getMovieDetails(String imdbID);
 }
+
 
 class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
   final Dio dio;
@@ -14,26 +14,27 @@ class MovieRemoteDatasourceImpl implements MovieRemoteDatasource {
 
   MovieRemoteDatasourceImpl({required this.dio, required this.apiKey});
 
-  @override
-  Future<List<Movie>> searchMovies(String query) async {
-    final response = await dio.get(
-      'http://www.omdbapi.com/',
-      queryParameters: {'apikey': apiKey, 's': query},
-    );
+@override
+Future<List<Movie>> searchMovies(String query, int page) async {
+  final response = await dio.get(
+    'http://www.omdbapi.com/',
+    queryParameters: {'apikey': apiKey, 's': query, 'page': page},
+  );
 
-    if (response.statusCode == 200) {
-      final data = response.data;
-
-      if (data['Response'] == 'True') {
-        final List results = data['Search'];
-        return results.map((e) => MovieModel.fromJson(e)).toList();
-      } else {
-        throw Exception(data['Error'] ?? 'Nenhum filme encontrado');
-      }
+  if (response.statusCode == 200) {
+    final data = response.data;
+    if (data['Response'] == 'True') {
+      final List results = data['Search'];
+      return results.map((e) => MovieModel.fromJson(e)).toList();
     } else {
-      throw Exception('Erro na conexão com a API');
+      return []; // Não lança exceção, apenas retorna lista vazia
     }
+  } else {
+    throw Exception('Erro na conexão com a API');
   }
+}
+
+
 
   @override
   Future<Movie> getMovieDetails(String imdbID) async {

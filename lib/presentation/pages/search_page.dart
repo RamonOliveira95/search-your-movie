@@ -21,12 +21,35 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
   void _onSearch() {
     final query = _controller.text.trim();
     if (query.isNotEmpty) {
-      context.read<SearchBloc>().add(SearchMoviesEvent(query));
+      context.read<SearchBloc>().add(SearchMoviesEvent(query, page: 1));
     }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      final state = context.read<SearchBloc>().state;
+      if (state is SearchSuccess && state.hasMore) {
+        context.read<SearchBloc>().add(SearchMoviesEvent(state.query, page: state.currentPage + 1));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,17 +65,12 @@ class _SearchPageState extends State<SearchPage> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Digite o nome do filme',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Digite o nome do filme'),
                     onSubmitted: (_) => _onSearch(),
                   ),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _onSearch,
-                  child: const Text('Buscar'),
-                ),
+                ElevatedButton(onPressed: _onSearch, child: const Text('Buscar')),
               ],
             ),
             const SizedBox(height: 20),
@@ -61,22 +79,22 @@ class _SearchPageState extends State<SearchPage> {
                 builder: (context, state) {
                   if (state is SearchInitial) {
                     return const Center(child: Text('Digite algo para buscar'));
-                  } else if (state is SearchLoading) {
+                  } else if (state is SearchLoading && state.page == 1) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is SearchSuccess) {
-                    if (state.movies.isEmpty) {
-                      return const Center(
-                        child: Text('Nenhum filme encontrado'),
-                      );
-                    }
                     return ListView.builder(
-                      itemCount: state.movies.length,
+                      controller: _scrollController,
+                      itemCount: state.hasMore ? state.movies.length + 1 : state.movies.length,
                       itemBuilder: (context, index) {
-                        final movie = state.movies[index];
-                        return MovieTile(
-                          movie: movie,
-                          repository: widget.repository,
-                        );
+                        if (index < state.movies.length) {
+                          final movie = state.movies[index];
+                          return MovieTile(movie: movie, repository: widget.repository);
+                        } else {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
                       },
                     );
                   } else if (state is SearchError) {
@@ -120,7 +138,6 @@ class MovieTile extends StatelessWidget {
         try {
           final detailedMovie = await repository.getMovieDetails(movie.imdbID);
           await repository.saveRecentMovie(detailedMovie);
-
           Navigator.push(
             context,
             MaterialPageRoute(

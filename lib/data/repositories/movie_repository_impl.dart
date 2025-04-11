@@ -12,8 +12,8 @@ class MovieRepositoryImpl implements MovieRepository {
   List<Movie> _recentMovies = [];
 
   @override
-  Future<List<Movie>> searchMovies(String query) {
-    return datasource.searchMovies(query);
+  Future<List<Movie>> searchMovies(String query, int page) {
+    return datasource.searchMovies(query, page);
   }
 
   @override
@@ -29,20 +29,21 @@ class MovieRepositoryImpl implements MovieRepository {
       _recentMovies = _recentMovies.sublist(0, 5);
     }
 
-    await _persistRecentMovies(); // Salva localmente
+    await _persistRecentMovies();
   }
 
   @override
   Future<List<Movie>> getRecentMovies() async {
     if (_recentMovies.isEmpty) {
-      await _loadRecentMovies(); // Carrega do armazenamento local
+      await _loadRecentMovies();
     }
     return _recentMovies;
   }
 
   Future<void> _persistRecentMovies() async {
     final prefs = await SharedPreferences.getInstance();
-    final movieJsonList = _recentMovies.map((movie) => jsonEncode(movie.toJson())).toList();
+    final movieJsonList =
+        _recentMovies.map((movie) => jsonEncode(movie.toJson())).toList();
     await prefs.setStringList('recent_movies', movieJsonList);
   }
 
@@ -52,5 +53,10 @@ class MovieRepositoryImpl implements MovieRepository {
     _recentMovies = movieJsonList
         .map((jsonMovie) => Movie.fromJson(jsonDecode(jsonMovie)))
         .toList();
+  }
+
+  Future<void> removeRecentMovie(String imdbID) async {
+    _recentMovies.removeWhere((m) => m.imdbID == imdbID);
+    await _persistRecentMovies();
   }
 }

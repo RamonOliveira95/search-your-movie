@@ -6,7 +6,9 @@ class SearchMovies {
 
   SearchMovies(this.repository);
 
-  Future<List<Movie>> call(String query) async {
-    return await repository.searchMovies(query);
+  Future<List<Movie>> call(String query, int page) {
+    return repository.searchMovies(query, page);
   }
 }
+
+

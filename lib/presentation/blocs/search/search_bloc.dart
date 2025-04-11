@@ -10,12 +10,34 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
   SearchBloc(this.searchMovies, this.saveRecentMovie) : super(SearchInitial()) {
     on<SearchMoviesEvent>((event, emit) async {
-      emit(SearchLoading());
+      final currentState = state;
+      final isFirstPage = event.page == 1;
+
+      if (isFirstPage) {
+        emit(SearchLoading(event.query, event.page));
+      }
+
       try {
-        final movies = await searchMovies(event.query);
-        emit(SearchSuccess(movies));
+        final newMovies = await searchMovies(event.query, event.page);
+        final hasMore = newMovies.isNotEmpty;
+
+        if (currentState is SearchSuccess && !isFirstPage) {
+          emit(SearchSuccess(
+            movies: [...currentState.movies, ...newMovies],
+            query: event.query,
+            currentPage: event.page,
+            hasMore: hasMore,
+          ));
+        } else {
+          emit(SearchSuccess(
+            movies: newMovies,
+            query: event.query,
+            currentPage: event.page,
+            hasMore: hasMore,
+          ));
+        }
       } catch (e) {
-        emit(SearchError(e.toString()));
+        emit(SearchError('Erro ao buscar filmes: $e'));
       }
     });
   }
