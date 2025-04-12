@@ -16,7 +16,14 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Erro: $message', style: TextStyle(color: Colors.white)));
+    final theme = Theme.of(context);
+    return Center(
+      child: Text(
+        'Erro: $message',
+        style: TextStyle(color: theme.colorScheme.onSurface),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }
 
@@ -27,6 +34,13 @@ class EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text(message, style: TextStyle(color: Colors.white),));
+    final theme = Theme.of(context);
+    return Center(
+      child: Text(
+        message,
+        style: TextStyle(color: theme.colorScheme.onSurface),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }

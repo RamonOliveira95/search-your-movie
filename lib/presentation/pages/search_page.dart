@@ -55,8 +55,10 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -66,21 +68,21 @@ class _SearchPageState extends State<SearchPage> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    style: const TextStyle(color: Colors.white),
+                    style: theme.textTheme.bodyLarge,
                     decoration: InputDecoration(
                       labelText: 'Digite o nome do filme',
-                      labelStyle: const TextStyle(color: Colors.white54),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(32),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(32),
-                        borderSide: const BorderSide(color: Colors.white54),
+                        borderSide: BorderSide(color: theme.hintColor),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(32),
-                        borderSide: const BorderSide(
-                          color: Colors.amber,
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.primary,
                           width: 2,
                         ),
                       ),
@@ -91,8 +93,8 @@ class _SearchPageState extends State<SearchPage> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow[700],
-                    foregroundColor: Colors.black,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                   ),
                   onPressed: _onSearch,
                   child: const Text('Buscar'),
@@ -156,8 +158,10 @@ class MovieCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      color: Colors.grey[900],
+      color: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
@@ -173,15 +177,11 @@ class MovieCard extends StatelessWidget {
         ),
         title: Text(
           movie.title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: Text(
-          movie.year,
-          style: const TextStyle(color: Colors.white70),
-        ),
+        subtitle: Text(movie.year, style: theme.textTheme.bodySmall),
         onTap: () async {
           final currentContext = context;
           try {
