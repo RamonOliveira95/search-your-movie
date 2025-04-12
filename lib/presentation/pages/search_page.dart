@@ -29,7 +29,24 @@ class _SearchPageState extends State<SearchPage> {
 
   void _onSearch() {
     final query = _controller.text.trim();
-    if (query.isNotEmpty) {
+    if (query.isEmpty) {
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Atenção'),
+              content: const Text('Por favor, adicione um filme para buscar'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Fechar'),
+                ),
+              ],
+            ),
+      );
+    } else {
       context.read<SearchBloc>().add(SearchMoviesEvent(query, page: 1));
     }
   }
@@ -114,6 +131,7 @@ class _SearchPageState extends State<SearchPage> {
                       return const EmptyStateWidget('Nenhum filme encontrado');
                     }
 
+                    // Verificar se há mais filmes para carregar e exibir o carregamento condicionalmente
                     return ListView.builder(
                       controller: _scrollController,
                       itemCount:
@@ -128,10 +146,12 @@ class _SearchPageState extends State<SearchPage> {
                             repository: widget.repository,
                           );
                         } else {
-                          return const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: LoadingStateWidget(),
-                          );
+                          return state.hasMore
+                              ? const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: LoadingStateWidget(),
+                              )
+                              : const SizedBox.shrink();
                         }
                       },
                     );

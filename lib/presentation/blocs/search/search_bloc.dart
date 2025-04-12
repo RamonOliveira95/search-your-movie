@@ -17,7 +17,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
       try {
         final newMovies = await searchMovies(event.query, event.page);
-        final hasMore = newMovies.isNotEmpty;
+        final hasMore = newMovies.length >= 10;
 
         if (currentState is SearchSuccess && !isFirstPage) {
           emit(SearchSuccess(
