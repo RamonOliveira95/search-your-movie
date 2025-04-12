@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
-
 import 'data/sources/movie_remote_source.dart';
 import 'data/repositories/movie_repository_impl.dart';
 import 'domain/cases/search_movies.dart';
 import 'domain/cases/save_recent_movie.dart';
 import 'presentation/blocs/search/search_bloc.dart';
 import 'presentation/pages/home_page.dart';
+import 'core/theme/theme.dart';
 
 void main() {
   final dio = Dio();
@@ -42,15 +42,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: BlocProvider(
-        create: (_) => SearchBloc(searchMovies, saveRecentMovie),
-        child: HomePage(
-          remoteDatasource: remoteDatasource,
-          repository: repository,
-        ),
-      ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: mode,
+          home: BlocProvider(
+            create: (_) => SearchBloc(searchMovies, saveRecentMovie),
+            child: HomePage(
+              remoteDatasource: remoteDatasource,
+              repository: repository,
+            ),
+          ),
+        );
+      },
     );
   }
 }

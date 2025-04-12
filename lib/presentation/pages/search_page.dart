@@ -11,10 +11,7 @@ import '../widgets/state_widgets.dart';
 class SearchPage extends StatefulWidget {
   final MovieRepositoryImpl repository;
 
-  const SearchPage({
-    super.key,
-    required this.repository,
-  });
+  const SearchPage({super.key, required this.repository});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -38,10 +35,13 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       final state = context.read<SearchBloc>().state;
       if (state is SearchSuccess && state.hasMore) {
-        context.read<SearchBloc>().add(SearchMoviesEvent(state.query, page: state.currentPage + 1));
+        context.read<SearchBloc>().add(
+          SearchMoviesEvent(state.query, page: state.currentPage + 1),
+        );
       }
     }
   }
@@ -56,7 +56,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Busca de Filmes')),
+      backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -66,12 +66,37 @@ class _SearchPageState extends State<SearchPage> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(labelText: 'Digite o nome do filme'),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Digite o nome do filme',
+                      labelStyle: const TextStyle(color: Colors.white54),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: const BorderSide(color: Colors.white54),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: const BorderSide(
+                          color: Colors.amber,
+                          width: 2,
+                        ),
+                      ),
+                    ),
                     onSubmitted: (_) => _onSearch(),
                   ),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(onPressed: _onSearch, child: const Text('Buscar')),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow[700],
+                    foregroundColor: Colors.black,
+                  ),
+                  onPressed: _onSearch,
+                  child: const Text('Buscar'),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -89,11 +114,17 @@ class _SearchPageState extends State<SearchPage> {
 
                     return ListView.builder(
                       controller: _scrollController,
-                      itemCount: state.hasMore ? state.movies.length + 1 : state.movies.length,
+                      itemCount:
+                          state.hasMore
+                              ? state.movies.length + 1
+                              : state.movies.length,
                       itemBuilder: (context, index) {
                         if (index < state.movies.length) {
                           final movie = state.movies[index];
-                          return MovieTile(movie: movie, repository: widget.repository);
+                          return MovieCard(
+                            movie: movie,
+                            repository: widget.repository,
+                          );
                         } else {
                           return const Padding(
                             padding: EdgeInsets.all(16),
@@ -117,44 +148,59 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-class MovieTile extends StatelessWidget {
+class MovieCard extends StatelessWidget {
   final Movie movie;
   final MovieRepositoryImpl repository;
 
-  const MovieTile({
-    super.key,
-    required this.movie,
-    required this.repository,
-  });
+  const MovieCard({super.key, required this.movie, required this.repository});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Image.network(
-        movie.poster,
-        width: 50,
-        height: 75,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+    return Card(
+      color: Colors.grey[900],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            movie.poster,
+            width: 50,
+            height: 75,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+          ),
+        ),
+        title: Text(
+          movie.title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          movie.year,
+          style: const TextStyle(color: Colors.white70),
+        ),
+        onTap: () async {
+          try {
+            final detailedMovie = await repository.getMovieDetails(
+              movie.imdbID,
+            );
+            await repository.saveRecentMovie(detailedMovie);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MovieDetailsPage(movie: detailedMovie),
+              ),
+            );
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erro ao carregar detalhes: $e')),
+            );
+          }
+        },
       ),
-      title: Text(movie.title),
-      subtitle: Text(movie.year),
-      onTap: () async {
-        try {
-          final detailedMovie = await repository.getMovieDetails(movie.imdbID);
-          await repository.saveRecentMovie(detailedMovie);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MovieDetailsPage(movie: detailedMovie),
-            ),
-          );
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao carregar detalhes: $e')),
-          );
-        }
-      },
     );
   }
 }

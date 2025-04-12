@@ -16,7 +16,7 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Erro: $message'));
+    return Center(child: Text('Erro: $message', style: TextStyle(color: Colors.white)));
   }
 }
 
@@ -27,6 +27,6 @@ class EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text(message));
+    return Center(child: Text(message, style: TextStyle(color: Colors.white),));
   }
 }
