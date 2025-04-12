@@ -183,19 +183,22 @@ class MovieCard extends StatelessWidget {
           style: const TextStyle(color: Colors.white70),
         ),
         onTap: () async {
+          final currentContext = context;
           try {
             final detailedMovie = await repository.getMovieDetails(
               movie.imdbID,
             );
             await repository.saveRecentMovie(detailedMovie);
+            if (!currentContext.mounted) return;
             Navigator.push(
-              context,
+              currentContext,
               MaterialPageRoute(
                 builder: (_) => MovieDetailsPage(movie: detailedMovie),
               ),
             );
           } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            if (!currentContext.mounted) return;
+            ScaffoldMessenger.of(currentContext).showSnackBar(
               SnackBar(content: Text('Erro ao carregar detalhes: $e')),
             );
           }

@@ -32,19 +32,20 @@ class _RecentPageState extends State<RecentPage> {
   }
 
   Future<void> _confirmDelete(Movie movie) async {
+    final dialogContext = context;
     final confirm = await showDialog<bool>(
-      context: context,
+      context: dialogContext,
       builder:
-          (context) => AlertDialog(
+          (dialogContext) => AlertDialog(
             title: const Text('Remover filme'),
             content: Text('Deseja remover "${movie.title}" dos recentes?'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
                 child: const Text('Cancelar'),
               ),
               ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
                 child: const Text('Remover'),
               ),
             ],
@@ -53,6 +54,7 @@ class _RecentPageState extends State<RecentPage> {
 
     if (confirm == true) {
       await _removeMovie(movie.imdbID);
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('${movie.title} removido.')));
@@ -117,18 +119,21 @@ class _RecentPageState extends State<RecentPage> {
                     onPressed: () => _confirmDelete(movie),
                   ),
                   onTap: () async {
+                    final currentContext = context;
                     try {
                       final detailedMovie = await widget.repository
                           .getMovieDetails(movie.imdbID);
+                      if (!currentContext.mounted) return;
                       Navigator.push(
-                        context,
+                        currentContext,
                         MaterialPageRoute(
                           builder:
                               (_) => MovieDetailsPage(movie: detailedMovie),
                         ),
                       );
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      if (!currentContext.mounted) return;
+                      ScaffoldMessenger.of(currentContext).showSnackBar(
                         SnackBar(
                           content: Text('Erro ao carregar detalhes: $e'),
                         ),

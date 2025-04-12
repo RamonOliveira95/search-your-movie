@@ -55,7 +55,7 @@ class MovieDetailsPage extends StatelessWidget {
                         errorBuilder:
                             (_, __, ___) => Container(
                               height: 200,
-                              color: theme.colorScheme.surfaceVariant,
+                              color: theme.colorScheme.surfaceContainerHighest,
                               child: const Center(
                                 child: Icon(
                                   Icons.image_not_supported,
