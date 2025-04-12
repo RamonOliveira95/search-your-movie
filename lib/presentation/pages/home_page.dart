@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'search_page.dart';
-import 'recent_page.dart';
+import 'pages.dart';
 import '../../data/sources/movie_remote_source.dart';
 import '../../data/repositories/movie_repository_impl.dart';
 import '../../core/theme/theme.dart';
