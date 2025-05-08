@@ -1,3 +1,93 @@
+# EN
+
+# 🎬 Search Your Movie
+
+## Description
+
+Search Your Movie is a Flutter app for searching movies using the [OMDb API](https://www.omdbapi.com/). It allows users to search for titles, view movie details, and maintain a history of recent searches. The app features light/dark themes and follows a clean architecture, with unit and widget tests.
+
+## ✨ Features
+
+- 🔎 Search for movies by title.
+- 📄 View movie details (movie title, release year, genre, and synopsis).
+- 🕓 History of the last 5 movies accessed.
+- 🌗 Toggle between light and dark themes.
+- 💥 State handling: loading, error, and empty states.
+- ✅ Unit and widget tests.
+
+## 🧠 Architecture
+
+The project follows Clean Architecture principles, divided into:
+
+- **Domain**: Entities and use cases of the application.
+- **Data**: Repository implementations, models, remote data sources, and local storage.
+- **Presentation**: UI layer (pages, blocs, widgets).
+- **Core**: Shared themes and future dependencies.
+
+## Technologies Used
+
+- **Flutter**: Development framework.
+- **Bloc**: State management.
+- **API OMDb**: The API that provides movie data.
+- **Dio**: Used for making network requests.
+- **Shared Preferences**: Used for local data storage.
+- **Responsividade**: Ensures compatibility with multiple screen sizes.
+
+### Prerequisites
+
+- Flutter 3.29.2.
+- Dart 3.7.2.
+- Visual Studio Code.
+- An Android or iOS device, or an emulator, configured.
+- Tests were performed using Chrome Web, Pixel 5 API 31, and Windows Desktop.
+
+## 🛠️ How to Run
+
+### 1. Clone the repository.
+
+### 2. Open the terminal and run 'flutter pub get'.
+
+### 3. Run the app using the 'flutter run' command on an emulator.
+
+## ✅ Final Considerations
+
+The app was developed with a focus on best practices in architecture and clean code:
+
+- Modular organization following Clean Architecture.
+- Clear separation of concerns between layers.
+- Use of the Bloc pattern for state management.
+- Consuming the OMDb API with error handling and empty state management.
+- Reusable components for states (loading, error, empty).
+- IMDb-inspired interface, responsive design with support for light/dark themes.
+- Unit tests for use cases and widget tests with interaction coverage.
+- Commits follow semantic versioning conventions.
+- Pagination implemented to list all search results.
+
+## Notes
+- To improve the organization of imports in larger projects, it's helpful to create central files like 'pages.dart', 'cases.dart', and 'search.dart'. These files re-export content from directories, making it easier to import multiple files with a single line, thus reducing clutter and keeping the code cleaner. I used these files as examples in this project. While not essential for small projects, they are recommended as the project grows.
+- To protect the API key, you can use the 'flutter_dotenv' package. I didn’t implement this in this project to simplify testing and avoid potential issues for others running the code. If I had included it, the API key would have been in the .gitignore to prevent version control and ensure security. In real-world projects, it’s better to either use a backend intermediary to make API calls or store the key securely to avoid exposing it in the code.
+
+## 📋 Checklist
+
+- [x] Organized and modular code.
+- [x] Clear separation of concerns (UI, logic, data).
+- [x] Adherence to Clean Code principles.
+- [x] Error and empty state handling.
+- [x] Reusable widgets.
+- [x] Semantic commits.
+- [x] Unit and widget tests.
+- [x] README with setup instructions.
+
+## Author
+- Ramon Oliveira - [Linkedin](https://www.linkedin.com/in/ramon-oliveira-developer/)
+
+## Test Video Using Pixel 5 API 31 Emulator
+
+https://github.com/user-attachments/assets/9da35626-0cfe-479c-9aec-440b97b0bd7a
+
+
+# PT-BR
+
 # 🎬 Search Your Movie
 
 ## Descrição
